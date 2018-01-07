@@ -104,4 +104,36 @@ class cohort_role_assignment extends persistent {
         return true;
     }
 
+    /**
+     * Load a list of records set.
+     *
+     * @param string $sort Field to sort by.
+     * @param string $order Sort order.
+     * @param int $skip Limitstart.
+     * @param int $limit Number of rows to return.
+     *
+     * @return \core_competency\persistent[]
+     */
+    public static function get_records_users($sort = '', $order = 'ASC', $skip = 0, $limit = 0) {
+        global $DB;
+
+        $orderby = '';
+        if (!empty($sort)) {
+            $orderby = ' ORDER BY '.$sort . ' ' . $order;
+        }
+        $sql = 'SELECT c.*
+                  FROM {' . static::TABLE . '} c
+                  JOIN {user} u
+                    ON u.id = c.userid
+                 WHERE u.deleted = 0';
+        $recordset = $DB->get_recordset_sql($sql.$orderby, array(), $skip, $limit);
+        $instances = array();
+        foreach ($recordset as $record) {
+            $newrecord = new static(0, $record);
+            array_push($instances, $newrecord);
+        }
+        $recordset->close();
+       
+        return $instances;
+    }
 }
