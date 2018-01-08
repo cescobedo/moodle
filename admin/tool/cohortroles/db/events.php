@@ -15,20 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version info
+ * Observer to sync cohort role assignments.
  *
  * @package    tool_cohortroles
- * @copyright  2015 Damyon Wiese
+ * @author     Carlos Escobedo <http://www.twitter.com/carlosagile>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright  2018 Carlos Escobedo <http://www.twitter.com/carlosagile>)
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-
-$plugin->version   = 2017051500; // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2017050500; // Requires this Moodle version.
-$plugin->component = 'tool_cohortroles'; // Full name of the plugin (used for diagnostics).
-
-$plugin->dependencies = array(
-    'tool_lp' => ANY_VERSION
+$observers = array(
+    array(
+        'eventname'   => '\core\event\user_deleted',
+        'callback'    => '\tool_cohortroles\eventobservers::user_deleted',
+    )
 );

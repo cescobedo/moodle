@@ -247,4 +247,29 @@ class tool_cohortroles_api_testcase extends advanced_testcase {
         $this->assertEquals($sync, $expected);
     }
 
+    /**
+     * Test to check sync when user is deleted.
+     */
+    public function test_sync_all_delete_user() {
+        $this->setAdminUser();
+        $params = (object) array(
+            'userid' => $this->userassignto->id,
+            'roleid' => $this->roleid,
+            'cohortid' => $this->cohort->id
+        );
+        $result = api::create_cohort_role_assignment($params);
+        delete_user($this->userassignto);
+        $sync = api::sync_all_cohort_roles();
+
+        // Verify roles added and remove which has to be 0.
+        $rolesadded = array();
+        $rolesremoved = array();
+        $expected = array('rolesadded' => $rolesadded,
+                          'rolesremoved' => $rolesremoved);
+        $this->assertEquals($sync, $expected);
+        
+        // Check number of cohort role assignments.
+        $count = api::count_cohort_role_assignments();
+        $this->assertEquals($count, 0);
+    }
 }
