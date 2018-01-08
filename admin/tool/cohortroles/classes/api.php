@@ -145,7 +145,7 @@ class api {
         $rolesremoved = array();
 
         // Get all cohort role assignments and group them by user and role.
-        $all = cohort_role_assignment::get_records(array(), 'userid, roleid');
+        $all = cohort_role_assignment::get_records_users('userid, roleid');
         // We build an better structure to loop on.
         $info = array();
         foreach ($all as $cra) {
