@@ -22,7 +22,7 @@
  * @copyright  2016 Ryan Wyllie <ryan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/ajax', 'core/notification', 'core/fragment', 'core/templates', 'core/str', 'tool_lp/dialogue'],
+define(['jquery', 'core/ajax', 'core/notification', 'core/fragment', 'core/templates', 'core/str', 'core_message/dialogue'],
         function($, Ajax, Notification, Fragment, Templates, Str, Dialogue) {
 
     var SELECTORS = {
