@@ -1294,17 +1294,20 @@ class api {
     }
 
     /**
-     * Creates a conversation between two users.
+     * Creates a conversation between users.
      *
      * @param array $userids
+     * @param bool $updatehash Hash is usefull only for 1-to-1 convs, so don't update it for group conversations.
      * @return int The id of the conversation
      */
-    public static function create_conversation_between_users(array $userids) {
+    public static function create_conversation_between_users(array $userids, bool $updatehash = true) : int {
         global $DB;
 
         $conversation = new \stdClass();
-        $conversation->convhash = helper::get_conversation_hash($userids);
         $conversation->timecreated = time();
+        if ($updatehash) {
+            $conversation->convhash = helper::get_conversation_hash($userids);
+        }
         $conversation->id = $DB->insert_record('message_conversations', $conversation);
 
         // Add members to this conversation.
@@ -1611,5 +1614,102 @@ class api {
                  WHERE (mcr.userid = ? AND mcr.requesteduserid = ?)
                     OR (mcr.userid = ? AND mcr.requesteduserid = ?)";
         return $DB->record_exists_sql($sql, [$userid, $requesteduserid, $requesteduserid, $userid]);
+    }
+
+    /**
+     * Add some new members to an existing conversation.
+     *
+     * @param array $userids   User ids array to add as members.
+     * @param int $convid    The conversation id. Must exists.
+     * @throws \dml_missing_record_exception    If convid conversation doesn't exist
+     * @throws \dml_exception   If there is a database error
+     */
+    public static function add_members_to_conversation(array $userids, int $convid) {
+        global $DB;
+
+        $conversation = $DB->get_record('message_conversations', ['id' => $convid], '*', MUST_EXIST);
+
+        // Be sure we are not trying to add a non existing user to the conversation. Work only with existing users.
+        list($useridcondition, $params) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+        $existingusers = array_keys($DB->get_records_select_menu('user',
+            "id $useridcondition", $params, 'id', 'id, id'));
+
+        // Be sure we are not adding a user is already member of the conversation. Take all the members.
+        $memberuserids = array_values($DB->get_records_menu(
+            'message_conversation_members', ['conversationid' => $convid], 'id', 'id, userid')
+        );
+
+        // Work with existing new members.
+        $members = array();
+        $newuserids = array_diff($existingusers, $memberuserids);
+        foreach ($newuserids as $userid) {
+            $member = new \stdClass();
+            $member->conversationid = $convid;
+            $member->userid = $userid;
+            $member->timecreated = time();
+            $members[] = $member;
+        }
+
+        $transaction = $DB->start_delegated_transaction();
+
+        $DB->insert_records('message_conversation_members', $members);
+
+        // Hash is usefull only for 1-to-1 convs, so we don't update null conversation hashes.
+        if (isset($conversation->convhash)) {
+            // Getting all conversation members to create a new hash.
+            $newuserids = array_values($DB->get_records_menu(
+                'message_conversation_members', ['conversationid' => $convid], 'id', 'id, userid')
+            );
+
+            $conversation->convhash = helper::get_conversation_hash($newuserids);
+            $DB->update_record('message_conversations', $conversation);
+        }
+        $transaction->allow_commit();
+    }
+
+    /**
+     * Remove some members from an existing conversation.
+     *
+     * @param array $userids   The user ids to remove from conversation members.
+     * @param int $convid    The conversation id. Must exists.
+     * @throws \dml_exception
+     */
+    public static function remove_members_from_conversation(array $userids, int $convid) {
+        global $DB;
+
+        $conversation = $DB->get_record('message_conversations', ['id' => $convid], '*', MUST_EXIST);
+
+        list($useridcondition, $params) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+        $params['convid'] = $convid;
+
+        $transaction = $DB->start_delegated_transaction();
+
+        $DB->delete_records_select('message_conversation_members',
+            "conversationid = :convid AND userid $useridcondition", $params);
+
+        // Hash is usefull only for 1-to-1 convs, so we don't update null conversation hashes.
+        if (isset($conversation->convhash)) {
+            // Getting all conversation members to create a new hash.
+            $newuserids = array_values($DB->get_records_menu(
+                'message_conversation_members', ['conversationid' => $convid], 'id', 'id, userid')
+            );
+
+            $conversation->convhash = helper::get_conversation_hash($newuserids);
+            $DB->update_record('message_conversations', $conversation);
+        }
+        $transaction->allow_commit();
+    }
+
+    /**
+     * Count conversation members.
+     *
+     * @param int $convid    The conversation id.
+     * @return int  Number of conversation members.
+     * @throws \dml_exception
+     */
+    public static function count_conversation_members(int $convid) : int {
+        global $DB;
+
+        return $DB->count_records('message_conversation_members', ['conversationid' => $convid]);
     }
 }
