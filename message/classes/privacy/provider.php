@@ -139,6 +139,9 @@ class provider implements
         // as they are legacy tables. This information is moved to these
         // new tables in a separate ad-hoc task. See MDL-61255.
 
+        // The table 'message_conversation_area' does not contain any specific user data.
+        // It links components and item types to conversations.
+
         // Now add that we also have user preferences.
         $items->add_user_preference('core_message_messageprovider_settings',
             'privacy:metadata:preference:core_message_settings');
