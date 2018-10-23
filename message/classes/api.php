@@ -1984,24 +1984,25 @@ class api {
      * @param string $itemtype Defines the type of the component
      * @param int    $itemid The id of the component
      * @param int    $contextid The id of the context
-     * @param int    $enabled Allow enabled or disabled the conversation area
      * @param string $name The main name of the area
+     * @param int    $enabled Enable or disable the conversation area
      * @return \stdClass
      */
     public static function create_conversation_area(string $component,
                                                     string $itemtype,
                                                     int $itemid,
                                                     int $contextid,
-                                                    int $enabled = 0,
-                                                    string $name) {
+                                                    string $name,
+                                                    int $enabled = 0) {
         global $DB;
 
         // Create a conversation.
         $conversation = self::create_conversation(self::MESSAGE_CONVERSATION_TYPE_GROUP, array(), $name);
+
         // Create a conversation area.
         $conversationarea = new \stdClass;
         $conversationarea->conversationid = $conversation->id;
-        $conversationarea->component      = !empty($component) ? $component : '';
+        $conversationarea->component      = $component;
         $conversationarea->itemtype       = $itemtype;
         $conversationarea->itemid         = $itemid;
         $conversationarea->contextid      = $contextid;
@@ -2011,6 +2012,32 @@ class api {
         $conversationarea->id = $DB->insert_record('message_conversation_area', $conversationarea);
 
         return $conversationarea;
+    }
+
+    /**
+     * Checks whether or not a conversation area is enabled.
+     *
+     * @param string $component Defines the Moodle component which the area was added to.
+     * @param string $itemtype Defines the type of the component.
+     * @param int $itemid The id of the component.
+     * @param int $contextid The id of the context.
+     * @return bool Returns if a conversation area exists and is enabled, false otherwise
+     */
+    public static function is_conversation_area_enabled(string $component,
+                                                        string $itemtype,
+                                                        int $itemid,
+                                                        int $contextid) : bool {
+        global $DB;
+
+        return $DB->record_exists('message_conversation_area',
+            [
+                'itemid' => $itemid,
+                'contextid' => $contextid,
+                'component' => $component,
+                'itemtype' => $itemtype,
+                'enabled' => 1
+            ]
+        );
     }
 
     /**
@@ -2046,7 +2073,7 @@ class api {
         $conversationarea = new \stdClass();
         $conversationarea->id = $conversationareaid;
         $conversationarea->enabled = 1;
-        $conversationarea->timeread = time();
+        $conversationarea->timemodified = time();
         $DB->update_record('message_conversation_area', $conversationarea);
     }
 
@@ -2062,7 +2089,7 @@ class api {
         $conversationarea = new \stdClass();
         $conversationarea->id = $conversationareaid;
         $conversationarea->enabled = 0;
-        $conversationarea->timeread = time();
+        $conversationarea->timemodified = time();
         $DB->update_record('message_conversation_area', $conversationarea);
     }
 

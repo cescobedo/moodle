@@ -2589,7 +2589,7 @@ function xmldb_main_upgrade($oldversion) {
         $table = new xmldb_table('message_conversations');
 
         // Remove the unique 'convhash' index, change to null and add a new non unique index.
-        $index = new xmldb_index('convhash', XMLDB_INDEX_UNIQUE, array('convhash'));
+        $index = new xmldb_index('convhash', XMLDB_INDEX_UNIQUE, ['convhash']);
         if ($dbman->index_exists($table, $index)) {
             $dbman->drop_index($table, $index);
         }
@@ -2597,7 +2597,7 @@ function xmldb_main_upgrade($oldversion) {
         $field = new xmldb_field('convhash', XMLDB_TYPE_CHAR, '40', null, null, null, null, 'name');
         $dbman->change_field_notnull($table, $field);
 
-        $index = new xmldb_index('convhash', XMLDB_INDEX_NOTUNIQUE, array('convhash'));
+        $index = new xmldb_index('convhash', XMLDB_INDEX_NOTUNIQUE, ['convhash']);
         if (!$dbman->index_exists($table, $index)) {
             $dbman->add_index($table, $index);
         }
@@ -2605,7 +2605,7 @@ function xmldb_main_upgrade($oldversion) {
         upgrade_main_savepoint(true, 2018102200.00);
     }
 
-    if ($oldversion < 2018101900.03) {
+    if ($oldversion < 2018102300.01) {
         // Create new 'message_conversation_area' table.
         $table = new xmldb_table('message_conversation_area');
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null, null);
@@ -2628,7 +2628,7 @@ function xmldb_main_upgrade($oldversion) {
             $dbman->create_table($table);
         }
 
-        upgrade_main_savepoint(true, 2018101900.03);
+        upgrade_main_savepoint(true, 2018102300.01);
     }
 
     return true;

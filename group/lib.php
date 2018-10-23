@@ -282,8 +282,8 @@ function groups_create_group($data, $editform = false, $editoroptions = false) {
                                                         'groups',
                                                         $group->id,
                                                         $context->id,
-                                                        1,
-                                                        $group->name);
+                                                        $group->name,
+                                                        1);
         }
     }
 
@@ -444,8 +444,8 @@ function groups_update_group($data, $editform = false, $editoroptions = false) {
                                                             'groups',
                                                             $group->id,
                                                             $context->id,
-                                                            1,
-                                                            $group->name);
+                                                            $group->name,
+                                                            1);
             }
         }
     }
