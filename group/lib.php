@@ -107,6 +107,14 @@ function groups_add_member($grouporid, $userorid, $component=null, $itemid=0) {
     // Invalidate the group and grouping cache for users.
     cache_helper::invalidate_by_definition('core', 'user_group_groupings', array(), array($userid));
 
+    // Group conversation messaging.
+    if ($conversationarea = \core_message\api::get_conversation_area('core_group',
+                                                                     'groups',
+                                                                     $groupid,
+                                                                     $context->id)) {
+        \core_message\api::add_members_to_conversation([$userid], $conversationarea->conversationid);
+    }
+
     // Trigger group event.
     $params = array(
         'context' => $context,
@@ -210,6 +218,15 @@ function groups_remove_member($grouporid, $userorid) {
 
     // Invalidate the group and grouping cache for users.
     cache_helper::invalidate_by_definition('core', 'user_group_groupings', array(), array($userid));
+
+    // Group conversation messaging.
+    $context = context_course::instance($group->courseid);
+    if ($conversationarea = \core_message\api::get_conversation_area('core_group',
+                                                                     'groups',
+                                                                     $groupid,
+                                                                     $context->id)) {
+        \core_message\api::remove_members_from_conversation([$userid], $conversationarea->conversationid);
+    }
 
     // Trigger group event.
     $params = array(
@@ -440,12 +457,22 @@ function groups_update_group($data, $editform = false, $editoroptions = false) {
             \core_message\api::update_conversation_name($conversationarea->conversationid, $group->name);
         } else {
             if (!empty($data->enablemessaging)) {
-                \core_message\api::create_conversation_area('core_group',
-                                                            'groups',
-                                                            $group->id,
-                                                            $context->id,
-                                                            $group->name,
-                                                            1);
+                $conversationarea = \core_message\api::create_conversation_area('core_group',
+                                                                                'groups',
+                                                                                $group->id,
+                                                                                $context->id,
+                                                                                $group->name,
+                                                                                1);
+                // Add members to conversation if they exists in the group.
+                if ($groupmemberroles = groups_get_members_by_role($group->id, $group->courseid, 'u.id')) {
+                    foreach ($groupmemberroles as $roleid => $roledata) {
+                        $users = array();
+                        foreach ($roledata->users as $member) {
+                            $users[] = $member->id;
+                        }
+                    }
+                    \core_message\api::add_members_to_conversation($users, $conversationarea->conversationid);
+                }
             }
         }
     }
