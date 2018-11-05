@@ -1135,6 +1135,15 @@ $functions = array(
         'type' => 'read',
         'ajax' => true,
     ),
+    'core_message_get_conversation_between_users' => array(
+        'classname' => 'core_message_external',
+        'methodname' => 'get_conversation_between_users',
+        'classpath' => 'message/externallib.php',
+        'description' => 'Returns the id of the conversation between two users, false if not found.',
+        'type' => 'read',
+        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
+        'ajax' => true,
+    ),
     'core_message_search_contacts' => array(
         'classname' => 'core_message_external',
         'methodname' => 'search_contacts',

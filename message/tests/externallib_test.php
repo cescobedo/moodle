@@ -4916,4 +4916,57 @@ class core_message_externallib_testcase extends externallib_advanced_testcase {
         $this->expectException('moodle_exception');
         core_message_external::get_conversation_members($user3->id, $conversationid);
     }
+
+    /**
+     * Test get conversation between two users.
+     */
+    public function test_get_conversation_between_users() {
+        $this->resetAfterTest(true);
+
+        $userfrom1 = $this->getDataGenerator()->create_user();
+        $userto1 = $this->getDataGenerator()->create_user();
+        $userto2 = $this->getDataGenerator()->create_user();
+
+        $this->setUser($userfrom1);
+        // Create individual conversation.
+        $conversation = \core_message\api::create_conversation(
+            \core_message\api::MESSAGE_CONVERSATION_TYPE_INDIVIDUAL,
+            [$userfrom1->id, $userto1->id]
+        );
+        $conversationid = core_message_external::get_conversation_between_users($userto1->id, $userfrom1->id);
+        $this->assertEquals($conversation->id, $conversationid);
+        $this->assertFalse(core_message_external::get_conversation_between_users($userto2->id, $userfrom1->id));
+    }
+
+    /**
+     * Test get conversation between two users with an invalid user.
+     */
+    public function test_get_conversation_between_users_invalid_user_exception() {
+        $this->resetAfterTest(true);
+
+        $user = $this->getDataGenerator()->create_user();
+        // Test to user invalid.
+        $this->expectException('moodle_exception');
+        core_message_external::get_conversation_between_users(-99999, $user);
+        // Test from user invalid.
+        $this->expectException('moodle_exception');
+        core_message_external::get_conversation_between_users($user, -99999);
+    }
+
+    /**
+     * Test get conversation between two users without proper access.
+     */
+    public function test_get_conversation_between_users_access_denied_exception() {
+        $this->resetAfterTest(true);
+
+        $userfrom1 = $this->getDataGenerator()->create_user();
+        $userto1 = $this->getDataGenerator()->create_user();
+        $userfrom2 = $this->getDataGenerator()->create_user();
+
+        $this->send_message($userfrom1, $userto1, 'Message Test WS');
+        // Test userfrom2 without proper access.
+        $this->setUser($userfrom2);
+        $this->expectException('moodle_exception');
+        core_message_external::get_conversation_between_users($userto1->id, $userfrom1->id);
+    }
 }

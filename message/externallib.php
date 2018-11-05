@@ -3685,4 +3685,91 @@ class core_message_external extends external_api {
     public static function unset_favourite_conversations_returns() {
         return new external_warnings();
     }
+
+    /**
+     * Returns the id of the conversation between two users.
+     *
+     * @return external_function_parameters
+     * @since 3.6
+     */
+    public static function get_conversation_between_users_parameters() {
+        return new external_function_parameters(
+            array(
+                'useridto' => new external_value(PARAM_INT, 'the user id who received the message', VALUE_REQUIRED),
+                'useridfrom' => new external_value(
+                    PARAM_INT, 'the user id who send the message, 0 for any user.',
+                    VALUE_DEFAULT, 0),
+            )
+        );
+    }
+
+    /**
+     * Returns the id of the conversation between two users.
+     *
+     * @since  3.6
+     * @param  int      $useridto       the user id who received the message.
+     * @param  int      $useridfrom     the user id who send the message.
+     * @return int|bool The id of the conversation, false if not found.
+     * @throws \moodle_exception if messaging is disabled or if the user is invalid or cannot perform the action.
+     */
+    public static function get_conversation_between_users($useridto, $useridfrom = 0) {
+        global $CFG, $USER;
+
+        // Check if messaging is enabled.
+        if (empty($CFG->messaging)) {
+            throw new moodle_exception('disabled', 'message');
+        }
+
+        $params = self::validate_parameters(
+            self::get_conversation_between_users_parameters(),
+            array(
+                'useridto' => $useridto,
+                'useridfrom' => $useridfrom,
+            )
+        );
+
+        $context = context_system::instance();
+        self::validate_context($context);
+
+        $useridto = $params['useridto'];
+        $useridfrom = $params['useridfrom'];
+
+        if (!empty($useridto)) {
+            if (core_user::is_real_user($useridto)) {
+                $userto = core_user::get_user($useridto, '*', MUST_EXIST);
+            } else {
+                throw new moodle_exception('invaliduser');
+            }
+        }
+
+        if (!empty($useridfrom)) {
+            if (core_user::is_real_user($useridfrom)) {
+                $userfrom = core_user::get_user($useridfrom, '*', MUST_EXIST);
+            } else {
+                throw new moodle_exception('invaliduser');
+            }
+        } else {
+            $useridfrom = $USER->id;
+        }
+
+        if (($USER->id != $useridfrom) && !has_capability('moodle/site:readallmessages', $context)) {
+            throw new moodle_exception('You do not have permission to perform this action.');
+        }
+
+        if ($conversationid = \core_message\api::get_conversation_between_users([$useridto, $useridfrom])) {
+            return $conversationid;
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns the id of the conversation between two users.
+     *
+     * @return external_single_structure
+     * @since 3.6
+     */
+    public static function get_conversation_between_users_returns() {
+        return new external_value(PARAM_INT, 'The id of the conversation, false if not found');
+    }
 }
