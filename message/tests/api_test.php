@@ -5875,4 +5875,64 @@ class core_message_api_testcase extends core_message_messagelib_testcase {
     protected static function sort_contacts($a, $b) {
         return $a->userid > $b->userid;
     }
+
+    /**
+     * Test verifying that conversations can not be retrieved with group disabled.
+     */
+    public function test_get_conversations_with_group_disabled() {
+        // Create some users.
+        $user1 = self::getDataGenerator()->create_user();
+        $user2 = self::getDataGenerator()->create_user();
+        $user3 = self::getDataGenerator()->create_user();
+
+        // Create 2 groups conversation between and users 1, 2 and 3.
+        $gc1 = \core_message\api::create_conversation(
+            \core_message\api::MESSAGE_CONVERSATION_TYPE_GROUP,
+            [
+                $user1->id,
+                $user2->id
+            ]
+        );
+        $gc2 = \core_message\api::create_conversation(
+            \core_message\api::MESSAGE_CONVERSATION_TYPE_GROUP,
+            [
+                $user1->id,
+                $user3->id
+            ]
+        );
+        $ic1 = \core_message\api::create_conversation(
+            \core_message\api::MESSAGE_CONVERSATION_TYPE_INDIVIDUAL,
+            [
+                $user1->id,
+                $user2->id
+            ]
+        );
+        $time = 1;
+        // Send some messages only in one conversation group.
+        testhelper::send_fake_message_to_conversation($user2, $gc1->id, 'Message 1', $time);
+        testhelper::send_fake_message_to_conversation($user2, $gc1->id, 'Message 2', $time + 1);
+        // Send one message in individual conversation.
+        testhelper::send_fake_message_to_conversation($user2, $ic1->id, 'Message Individual', $time + 3);
+
+        // Check the amount unread for the user1.
+        // It should be 2, 1 for group conversation and 1 for individual conversation.
+        $this->assertEquals(2, core_message\api::count_unread_conversations($user1));
+        // Check number of conversations enabled.
+        $conversations = core_message\api::get_conversations($user1->id);
+        $this->assertCount(3, $conversations);
+        // Verify there are 1 individual conversation, 2 group conversations.
+        $typecounts  = array_count_values(array_column($conversations, 'type'));
+        $this->assertEquals(1, $typecounts[1]);
+        $this->assertEquals(2, $typecounts[2]);
+        // Disabled first group conversation.
+        \core_message\api::disable_conversation($gc1->id);
+        // Check the amount unread for the user1 only is 1 for individual.
+        $this->assertEquals(1, core_message\api::count_unread_conversations($user1));
+        // Check the number of group conversations is 1 only for the second group conversation.
+        $this->assertEquals(1, \core_message\api::count_conversations($user1, \core_message\api::MESSAGE_CONVERSATION_TYPE_GROUP));
+        // Enabled first group conversation.
+        \core_message\api::enable_conversation($gc1->id);
+        // Check the number of group conversations is 2.
+        $this->assertEquals(2, \core_message\api::count_conversations($user1, \core_message\api::MESSAGE_CONVERSATION_TYPE_GROUP));
+    }
 }

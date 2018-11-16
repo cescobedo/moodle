@@ -578,6 +578,7 @@ class api {
             LEFT JOIN {messages} m
                    ON m.id = lastmessage.messageid
                 WHERE mc.id IS NOT NULL $typesql $favouritesql
+                AND mc.enabled != 0
               ORDER BY (CASE WHEN m.timecreated IS NULL THEN 0 ELSE 1 END) DESC, m.timecreated DESC, id DESC";
 
         $params = array_merge($favouriteparams, ['userid' => $userid, 'action' => self::MESSAGE_ACTION_DELETED,
@@ -722,6 +723,7 @@ class api {
                              WHERE mcm.userid = ?
                                AND m.useridfrom != ?
                                AND mua.id is NULL
+                               AND mc.enabled != 0
                           GROUP BY m.conversationid';
         $unreadcounts = $DB->get_records_sql($unreadcountssql, [$userid, self::MESSAGE_ACTION_READ, self::MESSAGE_ACTION_DELETED,
             $userid, $userid]);
@@ -1395,7 +1397,8 @@ class api {
                     ON (mua.messageid = m.id AND mua.userid = ? AND mua.action = ?)
                  WHERE mcm.userid = ?
                    AND mcm.userid != m.useridfrom
-                   AND mua.id is NULL";
+                   AND mua.id is NULL
+                   AND mc.enabled != 0";
 
         return $DB->count_records_sql($sql, [$user->id, self::MESSAGE_ACTION_READ, $user->id]);
     }
@@ -1498,6 +1501,7 @@ class api {
                      LEFT JOIN {message_conversations} c
                             ON m.conversationid = c.id
                          WHERE m.userid = ?
+                           AND c.enabled != 0
                            AND c.type = ?
                                ${favouritessql}";
 
