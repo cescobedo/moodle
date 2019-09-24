@@ -41,7 +41,6 @@ defined('MOODLE_INTERNAL') || die();
  */
 function core_h5p_pluginfile($course, $cm, $context, string $filearea, array $args, bool $forcedownload,
     array $options = []) : bool {
-    global $DB;
 
     switch ($filearea) {
         default:
@@ -51,10 +50,7 @@ function core_h5p_pluginfile($course, $cm, $context, string $filearea, array $ar
             if ($context->contextlevel != CONTEXT_SYSTEM) {
                  return false; // Invalid context because the libraries are loaded always in the context system.
             }
-            // TODO: Review this piece of code because, although it's working, it's not good from the performance POV.
-            $filename = array_pop($args);
-            $filepath = (!$args ? '/' : '/' .implode('/', $args) . '/');
-            $itemid = $DB->get_field('files', 'itemid', ['filepath' => $filepath, 'filename' => $filename, 'filearea' => $filearea]);
+            $itemid = 0;
             break;
         case \core_h5p\file_storage::CONTENT_FILEAREA:
             if ($context->contextlevel != CONTEXT_SYSTEM) {
@@ -68,10 +64,8 @@ function core_h5p_pluginfile($course, $cm, $context, string $filearea, array $ar
             break;
     }
 
-    if (empty($filename)) {
-        $filename = array_pop($args);
-        $filepath = (!$args ? '/' : '/' .implode('/', $args) . '/');
-    }
+    $filename = array_pop($args);
+    $filepath = (!$args ? '/' : '/' .implode('/', $args) . '/');
 
     $fs = get_file_storage();
     $file = $fs->get_file($context->id, \core_h5p\file_storage::COMPONENT, $filearea, $itemid, $filepath, $filename);
