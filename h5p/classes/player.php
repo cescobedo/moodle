@@ -94,6 +94,7 @@ class player {
 
         $this->settings['contents'][ 'cid-' . $this->h5pid ] = [
             'library'         => \H5PCore::libraryToString($this->content['library']),
+            'libraryId'       => $this->content['library']['id'],
             'jsonContent'     => $this->get_filtered_parameters(),
             'fullScreen'      => $this->content['library']['fullscreen'],
             'exportUrl'       => $this->get_export_settings($displayoptions[ \H5PCore::DISPLAY_OPTION_DOWNLOAD ]),
@@ -511,5 +512,6 @@ class player {
             $file->delete();
         }
         $DB->delete_records('files', ['component' => 'core_h5p']);
+        $DB->delete_records('h5p_libraries_cachedassets');
     }
 }

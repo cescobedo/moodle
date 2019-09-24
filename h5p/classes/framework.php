@@ -1034,17 +1034,27 @@ class framework implements \H5PFrameworkInterface {
     }
 
     /**
-     * Will clear filtered params for all the content that uses the specified
-     * libraries. This means that the content dependencies will have to be rebuilt,
-     * and the parameters re-filtered.
      * Implements clearFilteredParameters().
      *
-     * @param array $libraryid array of library ids
+     * @param array $libraryids array of library ids
+     *
+     * @throws \dml_exception
+     * @throws \coding_exception
      */
-    public function clearFilteredParameters($libraryid) {
+    // @codingStandardsIgnoreLine
+    public function clearFilteredParameters($libraryids) {
         global $DB;
+        if (empty($libraryids)) {
+            return;
+        }
 
-        $DB->execute("UPDATE {h5p} SET filtered = null WHERE mainlibraryid = ?", array($libraryid));
+        list($insql, $inparams) = $DB->get_in_or_equal($libraryids);
+        $DB->execute("
+            UPDATE {h5p}
+            SET filtered = null
+            WHERE mainlibraryid $insql",
+            $inparams
+        );
     }
 
     /**
@@ -1075,7 +1085,7 @@ class framework implements \H5PFrameworkInterface {
     public function getNumContent($libraryid, $skip = NULL) {
         global $DB;
 
-        $skipquery = empty($skip) ? '' : ' AND id NOT IN (' . $skip .')';
+        $skipquery = empty($skip) ? '' : ' AND id NOT IN (' . implode(",", $skip) .')';
         $sql = "SELECT COUNT(id) FROM {h5p} WHERE mainlibraryid = :libraryid {$skipquery}";
         $sqlparams = array(
             'libraryid' => $libraryid
