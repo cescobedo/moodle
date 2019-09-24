@@ -587,11 +587,11 @@ class file_storage implements \H5PFileStorage {
                 // Rewrite relative URLs used inside stylesheets.
                 $content .= preg_replace_callback(
                         '/url\([\'"]?([^"\')]+)[\'"]?\)/i',
-                        function ($matches) use ($filearea, $filepath) {
+                        function ($matches) use ($filearea, $filepath, $fileid) {
                             if (preg_match("/^(data:|([a-z0-9]+:)?\/)/i", $matches[1]) === 1) {
                                 return $matches[0]; // Not relative, skip.
                             }
-                            return 'url("../' . $filearea . $filepath . $matches[1] . '")';
+                            return 'url("../' . $filearea . $filepath . $fileid . DIRECTORY_SEPARATOR . $matches[1] . '")';
                         },
                         $file->get_content()) . "\n";
             }
