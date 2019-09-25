@@ -703,7 +703,7 @@ class framework implements \H5PFrameworkInterface {
 
         if (!isset($content['id'])) {
             $data['timecreated'] = $data['timemodified'];
-            $data['slug'] = '';
+            //$data['slug'] = '';
             $id = $DB->insert_record('h5p', $data);
         } else {
             $id = $data['id'] = $content['id'];
@@ -1088,7 +1088,7 @@ class framework implements \H5PFrameworkInterface {
             'embedType' => $data->embedtype,
             'disable' => $data->displayoptions,
             'title' => 'h5p-test-title-' . $data->id, // TODO: how to get this value, current plugin is $data->name.
-            'slug' => $data->slug,
+            'slug' => 'h5p-test-title-' . $data->id,
             'filtered' => $data->filtered,
             'libraryId' => $data->libraryid,
             'libraryName' => $data->machinename,
@@ -1190,7 +1190,12 @@ class framework implements \H5PFrameworkInterface {
         $content->id = $id;
 
         foreach ($fields as $name => $value) {
-            $content->$name = $value;
+            if ($name <> 'slug') {
+                $content->$name = $value;
+            }
+            if ($name =='slug') {
+                unset($content->$name);
+            }
         }
 
         $DB->update_record('h5p', $content);
@@ -1269,8 +1274,8 @@ class framework implements \H5PFrameworkInterface {
      */
     public function isContentSlugAvailable($slug) {
         global $DB;
-
-        $sql = "SELECT id, slug
+        return true;
+        /*$sql = "SELECT id, slug
                   FROM {h5p}
                  WHERE slug = :slug";
 
@@ -1278,7 +1283,7 @@ class framework implements \H5PFrameworkInterface {
             'slug' => $slug
         );
 
-        return !$DB->get_records_sql($sql, $sqlparams, 0, 1);
+        return !$DB->get_records_sql($sql, $sqlparams, 0, 1);*/
     }
 
     /**
