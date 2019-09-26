@@ -3564,6 +3564,7 @@ function xmldb_main_upgrade($oldversion) {
         $table->add_field('patchversion', XMLDB_TYPE_INTEGER, '4', null, XMLDB_NOTNULL, null, null);
         $table->add_field('runnable', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, null);
         $table->add_field('fullscreen', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('embedtypes', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
         $table->add_field('preloadedjs', XMLDB_TYPE_TEXT, null, null, null, null, null);
         $table->add_field('preloadedcss', XMLDB_TYPE_TEXT, null, null, null, null, null);
         $table->add_field('droplibrarycss', XMLDB_TYPE_TEXT, null, null, null, null, null);
@@ -3606,7 +3607,6 @@ function xmldb_main_upgrade($oldversion) {
         // Adding fields to table h5p.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('jsoncontent', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
-        $table->add_field('embedtype', XMLDB_TYPE_CHAR, '127', null, XMLDB_NOTNULL, null, null);
         $table->add_field('mainlibraryid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
         $table->add_field('displayoptions', XMLDB_TYPE_TEXT, null, null, null, null, null);
         $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');

@@ -4142,6 +4142,7 @@
         <FIELD NAME="patchversion" TYPE="int" LENGTH="4" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="runnable" TYPE="int" LENGTH="1" NOTNULL="true" SEQUENCE="false" COMMENT="Can this library be started by the module? i.e. not a dependency."/>
         <FIELD NAME="fullscreen" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Display fullscreen button"/>
+        <FIELD NAME="embedtypes" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="List of supported embed types"/>
         <FIELD NAME="preloadedjs" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Comma separated list of scripts to load."/>
         <FIELD NAME="preloadedcss" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Comma separated list of stylesheets to load."/>
         <FIELD NAME="droplibrarycss" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="List of libraries that should not have CSS included if this library is used. Comma separated list."/>
@@ -4172,7 +4173,6 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="jsoncontent" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The content in json format"/>
-        <FIELD NAME="embedtype" TYPE="char" LENGTH="127" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="mainlibraryid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The library we first instanciate for this node"/>
         <FIELD NAME="displayoptions" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="All different display options in JSON format"/>
         <FIELD NAME="pathnamehash" TYPE="char" LENGTH="40" NOTNULL="true" SEQUENCE="false" COMMENT="Defines the complete unique hash for the file path where the H5P content was added."/>
