@@ -72,6 +72,7 @@ $string['editor'] = 'Editor';
 $string['embed'] = 'Embed';
 $string['embedtitle'] = 'View the embed code for this content.';
 $string['fileExceedsMaxSize'] = 'One of the files inside the package exceeds the maximum file size allowed. ({$a->%file} {$a->%used} > {$a->%max})';
+$string['eventh5pviewed'] = 'H5P viewed';
 $string['fullscreen'] = 'Fullscreen';
 $string['gpl'] = 'General Public License v3';
 $string['h5p'] = 'H5P';

@@ -150,7 +150,8 @@ class player {
             'url'             => $this->get_embed_url($this->url),
             'contentUrl'      => $contenturl->out(),
             'metadata'        => $this->content['metadata'],
-            'contentUserData' => [],
+            'contentUserData' => array(
+                            0 => ['state' => '{}'])
         ];
         $this->settings['contents'][$cid] = array_merge($this->settings['contents'][$cid], $contentsettings);
 
@@ -172,15 +173,30 @@ class player {
      * @return string The HTML code to display this H5P content.
      */
     public function output() : string {
-        global $OUTPUT;
+        global $OUTPUT, $USER, $DB;
 
         $template = new \stdClass();
         $template->h5pid = $this->h5pid;
+        $h5phtml = null;
+
         if ($this->embedtype === 'div') {
-            return $OUTPUT->render_from_template('core_h5p/h5pdiv', $template);
+            $h5phtml = $OUTPUT->render_from_template('core_h5p/h5pdiv', $template);
         } else {
-            return $OUTPUT->render_from_template('core_h5p/h5piframe', $template);
+            $h5phtml = $OUTPUT->render_from_template('core_h5p/h5piframe', $template);
         }
+
+        // Trigger capability_assigned event.
+        \core\event\h5p_viewed::create([
+            'objectid' => $this->h5pid,
+            'userid' => $USER->id,
+            'context' => $this->context,
+            'other' => [
+                'url' => $this->url,
+                'time' => time()
+            ]
+        ])->trigger();
+
+        return $h5phtml;
     }
 
     /**
