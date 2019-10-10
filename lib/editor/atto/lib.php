@@ -117,6 +117,12 @@ class atto_texteditor extends texteditor {
                     continue;
                 }
 
+                // Remove H5P if the component wants to clean-up the text.
+                $noclean = (isset($options['noclean']) && !$options['noclean']);
+                if ($plugin == 'h5p' && $noclean && !trusttext_active()) {
+                    continue;
+                }
+
                 // Remove manage files if requested.
                 if ($plugin == 'managefiles' && isset($options['enable_filemanagement']) && !$options['enable_filemanagement']) {
                     continue;
