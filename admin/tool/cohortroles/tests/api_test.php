@@ -132,15 +132,52 @@ class tool_cohortroles_api_testcase extends advanced_testcase {
     }
 
     public function test_delete_cohort_role_assignment() {
+        global $DB;
+
         $this->setAdminUser();
+        // Create cohort role assigment.
         $params = (object) array(
             'userid' => $this->userassignto->id,
             'roleid' => $this->roleid,
             'cohortid' => $this->cohort->id
         );
         $result = api::create_cohort_role_assignment($params);
+        $sync = api::sync_all_cohort_roles();
+        // Check if everything goes well
+        $rolesadded = array(array(
+            'useridassignedto' => $this->userassignto->id,
+            'useridassignedover' => $this->userassignover->id,
+            'roleid' => $this->roleid
+        ));
+        $rolesremoved = array();
+        $expected = array('rolesadded' => $rolesadded,
+                          'rolesremoved' => $rolesremoved);
+        $this->assertEquals($sync, $expected);
+
+        // Delete cohort role assigment.
         $worked = api::delete_cohort_role_assignment($result->get('id'));
         $this->assertTrue($worked);
+        // Check if there is one role assigment.
+        $params = [
+            'usercontext' => CONTEXT_USER,
+            'component' => 'tool_cohortroles',
+            'userid' => $this->userassignto->id,
+            'roleid' => $this->roleid,
+            'cohortid' => $this->cohort->id
+        ];
+        $sql = 'SELECT COUNT(ctx.id)
+                  FROM {user} u
+                  JOIN {context} ctx ON u.id = ctx.instanceid
+                   AND ctx.contextlevel = :usercontext
+                  JOIN {role_assignments} ra ON ra.contextid = ctx.id
+             LEFT JOIN {cohort_members} cm ON u.id = cm.userid
+                 WHERE ra.component = :component
+                   AND ra.roleid = :roleid
+                   AND cm.cohortid = :cohortid
+                   AND ra.userid = :userid';
+        $usersassignover = $DB->count_records_sql($sql, $params);
+        // If everything went well, there should be no role assignment left.
+        $this->assertEquals(0, $usersassignover);
     }
 
     public function test_list_cohort_role_assignments() {

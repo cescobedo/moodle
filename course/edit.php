@@ -166,11 +166,7 @@ if ($editform->is_cancelled()) {
 
         if (!empty($CFG->creatornewroleid) and !is_viewing($context, NULL, 'moodle/role:assign') and !is_enrolled($context, NULL, 'moodle/role:assign')) {
             // Deal with course creators - enrol them internally with default role.
-            if (user_can_assign($context, $CFG->creatornewroleid)) {
-                enrol_try_internal_enrol($course->id, $USER->id, $CFG->creatornewroleid);
-            } else {
-                enrol_try_internal_enrol($course->id, $USER->id);
-            }
+            enrol_try_internal_enrol($course->id, $USER->id, $CFG->creatornewroleid);
         }
 
         // The URL to take them to if they chose save and display.

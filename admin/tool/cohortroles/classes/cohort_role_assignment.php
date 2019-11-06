@@ -104,4 +104,41 @@ class cohort_role_assignment extends persistent {
         return true;
     }
 
+    /**
+     * Unassing the role before delete the cohort role assignment.
+     *
+     * @return null
+     */
+    protected function before_delete() {
+        global $DB;
+
+        // Before delete the cohort role assignment.
+        // We have to unassign the role.
+        $params = [
+            'usercontext' => CONTEXT_USER,
+            'component' => 'tool_cohortroles',
+            'userid' => $this->get('userid'),
+            'roleid' => $this->get('roleid'),
+            'cohortid' => $this->get('cohortid')
+        ];
+
+        $sql = 'SELECT ctx.id AS contextid
+                  FROM {user} u
+                  JOIN {context} ctx ON u.id = ctx.instanceid
+                   AND ctx.contextlevel = :usercontext
+                  JOIN {role_assignments} ra ON ra.contextid = ctx.id
+             LEFT JOIN {cohort_members} cm ON u.id = cm.userid
+                 WHERE ra.component = :component
+                   AND ra.roleid = :roleid
+                   AND cm.cohortid = :cohortid
+                   AND ra.userid = :userid';
+
+        $toremove = $DB->get_records_sql($sql, $params);
+        foreach ($toremove as $remove) {
+            role_unassign($this->get('roleid'),
+                $this->get('userid'),
+                $remove->contextid,
+                'tool_cohortroles');
+        }
+    }
 }
