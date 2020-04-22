@@ -54,6 +54,10 @@ class behat_core_generator extends behat_generator_base {
                 'required' => ['shortname'],
                 'switchids' => ['category' => 'category'],
             ],
+            'contentbank contents' => [
+                'datagenerator' => 'contentbank_content',
+                'required' => ['name', 'contenttype', 'contextid'],
+            ],
             'groups' => [
                 'datagenerator' => 'group',
                 'required' => ['idnumber', 'course'],
