@@ -14,3 +14,8 @@
 .content-bank-container {
     min-height: 140px;
 }
+
+.cb-toolbar .dropdown-scrollable {
+    max-height: 190px;
+    overflow-y: auto;
+}

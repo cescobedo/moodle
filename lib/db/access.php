@@ -2523,6 +2523,7 @@ $capabilities = array(
         ]
     ],
 
+
     // Manage (rename, move, publish, share, etc.) any content from the content bank.
     'moodle/contentbank:manageanycontent' => [
         'riskbitmask' => RISK_DATALOSS,
@@ -2536,6 +2537,19 @@ $capabilities = array(
 
     // Manage (rename, move, publish, share, etc.) content created by yourself.
     'moodle/contentbank:manageowncontent' => [
+        'riskbitmask' => RISK_SPAM,
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => array(
+            'manager' => CAP_ALLOW,
+            'coursecreator' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+        )
+    ],
+
+    // Allow users to create/edit content within the content bank.
+    'moodle/contentbank:useeditor' => [
+        'riskbitmask' => RISK_SPAM,
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,
         'archetypes' => array(

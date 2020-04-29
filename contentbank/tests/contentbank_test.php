@@ -23,6 +23,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace core_contentbank;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -37,7 +39,7 @@ require_once($CFG->dirroot . '/contentbank/tests/fixtures/testable_contenttype.p
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @coversDefaultClass \core_contentbank\contentbank
  */
-class core_contentbank_testcase extends advanced_testcase {
+class core_contentbank_testcase extends \advanced_testcase {
     /**
      * Data provider for test_get_extension_supporter.
      *
@@ -96,7 +98,7 @@ class core_contentbank_testcase extends advanced_testcase {
         $cb = new \core_contentbank\contentbank();
         $expectedsupporters = [$extension => $expected];
 
-        $systemcontext = context_system::instance();
+        $systemcontext = \context_system::instance();
 
         // All contexts allowed for admins.
         $this->setAdminUser();
@@ -118,7 +120,7 @@ class core_contentbank_testcase extends advanced_testcase {
         $this->resetAfterTest();
 
         $cb = new \core_contentbank\contentbank();
-        $systemcontext = context_system::instance();
+        $systemcontext = \context_system::instance();
 
         // Set a user with no permissions.
         $user = $this->getDataGenerator()->create_user();
@@ -148,7 +150,7 @@ class core_contentbank_testcase extends advanced_testcase {
         $course = $this->getDataGenerator()->create_course();
         $teacher = $this->getDataGenerator()->create_and_enrol($course, 'editingteacher');
         $this->setUser($teacher);
-        $coursecontext = context_course::instance($course->id);
+        $coursecontext = \context_course::instance($course->id);
 
         // Teachers has permission in their context to upload supported by H5P content type.
         $contextsupporters = $cb->load_context_supported_extensions($coursecontext);
@@ -169,7 +171,7 @@ class core_contentbank_testcase extends advanced_testcase {
         $this->resetAfterTest();
 
         $cb = new \core_contentbank\contentbank();
-        $systemcontext = context_system::instance();
+        $systemcontext = \context_system::instance();
         $this->setAdminUser();
 
         $supporter = $cb->get_extension_supporter($extension, $systemcontext);
@@ -322,5 +324,62 @@ class core_contentbank_testcase extends advanced_testcase {
                 ['contenttype_unexisting']
             ],
         ];
+    }
+
+    /**
+     * Data provider for get_contenttypes_can_feature.
+     *
+     * @return  array
+     */
+    public function get_contenttypes_can_feature_provider(): array {
+        return [
+            'no-contenttypes_enabled' => [
+                'contenttypesenabled' => [],
+                'contenttypescanfeature' => [],
+            ],
+            'contenttype_enabled_noeditable' => [
+                'contenttypesenabled' => ['testable'],
+                'contenttypescanfeature' => [],
+            ],
+            'contenttype_enabled_editable' => [
+                'contenttypesenabled' => ['testable'],
+                'contenttypescanfeature' => ['testable'],
+            ],
+        ];
+    }
+
+    /**
+     * Tests for get_contenttypes_can_feature() function.
+     *
+     * @dataProvider    get_contenttypes_can_feature_provider
+     * @param   array $contenttypesenabled Content types enabled.
+     * @param   array $contenttypescanfeature Content types the user has the permission to use the feature.
+     *
+     * @covers ::get_contenttypes_can_feature
+     */
+    public function test_get_contenttypes_can_feature(array $contenttypesenabled, array $contenttypescanfeature): void {
+        $this->resetAfterTest();
+
+        $cb = new \core_contentbank\contentbank();
+
+        // Get access to private property enabledcontenttypes property.
+        $rc = new \ReflectionClass(\core_contentbank\contentbank::class);
+        $rcp = $rc->getProperty('enabledcontenttypes');
+        $rcp->setAccessible(true);
+
+        $enabled = [];
+        foreach ($contenttypesenabled as $contenttypename) {
+            $enabled["\\contenttype_$contenttypename\\contenttype"] = $contenttypename;
+            // Add to the testable contenttype the feature to test.
+            if (in_array($contenttypename, $contenttypescanfeature)) {
+                $classname = "\\contenttype_$contenttypename\\contenttype";
+                $classname::$featurestotest = ['test2'];
+            }
+        }
+        // Set as enabled content types only those in the test.
+        $rcp->setValue($cb, $enabled);
+
+        $actual = $cb->get_contenttypes_can_feature('test2');
+        $this->assertEquals($contenttypescanfeature, array_values($actual));
     }
 }

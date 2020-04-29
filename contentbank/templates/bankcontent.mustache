@@ -15,7 +15,7 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template core_contentbank/list
+    @template core_contentbank/bankcontent
 
     Example context (json):
     {
@@ -32,6 +32,27 @@
         ],
         "tools": [
             {
+                "name": "Add",
+                "dropdown": true,
+                "link": "http://something/contentbank/edit.php?contextid=1",
+                "contenttypes": [
+                    {
+                        "name": "H5P Interactive Content",
+                        "baseurl": "http://something/contentbank/edit.php?contextid=1&plugin=h5p",
+                        "types": [
+                            {
+                                "typename": "H5P Interactive Content"
+                            },
+                            {
+                                "typename": "Accordion",
+                                "typeeditorparams": "library=Accordion-1.4",
+                                "typeicon": "http://something/pluginfile.php/1/core_h5p/libraries/13/H5P.Accordion-1.4/icon.svg"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
                 "name": "Upload",
                 "link": "http://something/contentbank/contenttype/h5p/view.php?url=http://something/pluginfile.php/1/contentbank/public/accordion.h5p",
                 "icon" : "i/upload"
@@ -43,14 +64,12 @@
     }
 
 }}
+
 <div class="d-flex justify-content-between flex-column flex-sm-row">
     <div class="cb-search-container mb-2">
         {{>core_contentbank/bankcontent/search}}
-    </div>
-    <div class="cb-toolbar-container mb-2">
         {{>core_contentbank/bankcontent/toolbar}}
     </div>
-</div>
 <div class="content-bank-container pb-3 border">
     <div class="content-bank">
         <div class="cb-navbar bg-light p-2 border-bottom">

@@ -23,6 +23,7 @@
  */
 
 $string['author'] = 'Author';
+$string['close'] = 'Close';
 $string['contentdeleted'] = 'The content has been deleted.';
 $string['contentname'] = 'Content name';
 $string['contentnotdeleted'] = 'An error was encountered while trying to delete the content.';
