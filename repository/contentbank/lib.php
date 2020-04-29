@@ -45,7 +45,7 @@ class repository_contentbank extends repository {
     public function get_listing($encodedpath = '', $page = '') {
         $ret = array();
         $ret['dynload'] = true;
-        $ret['nosearch'] = true;
+        $ret['nosearch'] = false;
         $ret['nologin'] = true;
 
         // Return the parameters from the encoded path if the encoded path is not empty.
@@ -138,5 +138,20 @@ class repository_contentbank extends repository {
         }
 
         return false;
+    }
+
+    /**
+     * Return search results.
+     *
+     * @param string $search
+     * @param int $page
+     * @return array
+     */
+    public function search($search, $page = 0) {
+        $ret = array();
+        $ret['nologin'] = true;
+        $ret['list'] = \repository_contentbank\search\contentbank_search::get_search_contents($search);
+
+        return $ret;
     }
 }
