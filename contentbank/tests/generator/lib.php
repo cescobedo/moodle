@@ -66,7 +66,7 @@ class core_contentbank_generator extends \component_generator_base {
         for ($i = 0; $i < $itemstocreate; $i++) {
             // Create content.
             $record = new stdClass();
-            $record->name = 'Test content ' . $i;
+            $record->name = $i . basename($filepath);
             $record->configdata = '';
             $record->usercreated = $userid ?? $USER->id;
 
