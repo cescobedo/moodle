@@ -35,13 +35,18 @@
 <div class="content-bank-toolbar card border-0 mb-3">
     <div class="content-bank">
         <div class="cb-toolbar float-sm-right">
-        {{#tools}}
-            {{#link}}<a href="{{{ link }}}" title="{{{ name }}}">{{/link}}
-                <div class="cb-tool icon-no-margin btn btn-secondary btn-lg">
-                    {{#pix}} {{{ icon }}} {{/pix}} <span class="d-inline d-sm-none">{{{ name }}}</span>
-                </div>
-            {{#link}}</a>{{/link}}
-        {{/tools}}
+            {{#tools}}
+                {{#dropdown}}
+                    {{>core_contentbank/bankcontent/toolbar_dropdown}}
+                {{/dropdown}}
+                {{^dropdown}}
+                    {{#link}}<a href="{{{ link }}}" title="{{{ name }}}">{{/link}}
+                    <div class="cb-tool icon-no-margin btn btn-secondary">
+                        {{#name}} {{name}} {{/name}} {{#pix}} {{{ icon }}} {{/pix}}
+                    </div>
+                    {{#link}}</a>{{/link}}
+                {{/dropdown}}
+            {{/tools}}
         </div>
     </div>
 </div>

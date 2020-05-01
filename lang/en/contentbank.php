@@ -29,7 +29,7 @@ $string['contentname'] = 'Content name';
 $string['contentnotdeleted'] = 'An error was encountered while trying to delete the content.';
 $string['contentnotrenamed'] = 'An error was encountered while trying to rename the content.';
 $string['contenttypenoaccess'] = 'You can not view this {$a} instance';
-
+$string['contenttypenoedit'] = 'You can not edit contents of the {$a} content type';
 $string['deletecontent'] = 'Delete content';
 $string['deletecontentconfirm'] = 'Are you sure you want to delete the content <em>\'{$a->name}\'</em> and all associated files? This action cannot be undone.';
 $string['file'] = 'Upload content';
