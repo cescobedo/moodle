@@ -159,6 +159,7 @@ class cohort_role_assignments_table extends table_sql {
         $this->sortable(true, 'lastname', SORT_ASC);
         $this->pageable(true);
         $this->no_sorting('actions');
+        $this->no_sorting('rolename');
     }
 
     /**
